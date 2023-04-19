@@ -1,16 +1,22 @@
-# Uncomment this to pass the first stage
-# import socket
+import socketserver
+
+
+class RedisServer(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+class RedisHandler(socketserver.StreamRequestHandler):
+    def handle(self):
+        pass
 
 
 def main():
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    print("Logs from your program will appear here!")
-
-    # Uncomment this to pass the first stage
-    #
-    # server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
-    # server_socket.accept() # wait for client
-
+    with RedisServer(('127.0.0.1', 6379), RedisHandler) as server:
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
 
 if __name__ == "__main__":
     main()
