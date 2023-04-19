@@ -18,6 +18,11 @@ class RedisServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
 
+    def __init__(self, *args, **kvargs):
+        super(RedisServer, self).__init__(*args, **kvargs)
+
+        self.store = {}
+
 
 class RESPHandler(socketserver.StreamRequestHandler):
     def receive(self, length: Optional[int] = None) -> str:
@@ -46,15 +51,27 @@ class RESPHandler(socketserver.StreamRequestHandler):
             if not isinstance(request, list):
                 raise ValueError('Expected array from client')
 
-            command, args = request[0], request[1:]
+            command, args = request[0].lower(), request[1:]
 
-            if command == 'PING':
+            if command == 'ping':
                 if not args:
                     self.send(SimpleStringType('PONG'))
                 else:
                     self.send(BulkStringType(args[0]))
-            elif command == 'ECHO':
+            elif command == 'echo':
                 self.send(BulkStringType(args[0]))
+            elif command == 'set':
+                key, value = args[0], args[1]
+
+                self.server.store[key] = value
+
+                self.send(SimpleStringType('OK'))
+            elif command == 'get':
+                key = args[0]
+
+                value = self.server.store.get(key)
+
+                self.send(None if not value else BulkStringType(value))
             else:
                 raise ValueError('Unknown command')
 
