@@ -6,13 +6,13 @@ class RedisServer(socketserver.ThreadingTCPServer):
     daemon_threads = True
 
 
-class RedisHandler(socketserver.StreamRequestHandler):
+class RESPHandler(socketserver.StreamRequestHandler):
     def handle(self):
-        pass
+        self.wfile.write('+PONG\r\n'.encode())
 
 
 def main():
-    with RedisServer(('127.0.0.1', 6379), RedisHandler) as server:
+    with RedisServer(('127.0.0.1', 6379), RESPHandler) as server:
         try:
             server.serve_forever()
         except KeyboardInterrupt:
