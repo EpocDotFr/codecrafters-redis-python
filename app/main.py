@@ -53,6 +53,8 @@ class RESPHandler(socketserver.StreamRequestHandler):
                     self.send(SimpleStringType('PONG'))
                 else:
                     self.send(BulkStringType(args[0]))
+            elif command == 'ECHO':
+                self.send(BulkStringType(args[0]))
             else:
                 raise ValueError('Unknown command')
 
