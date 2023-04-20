@@ -119,26 +119,26 @@ class RESPHandler(socketserver.StreamRequestHandler):
                 raise ValueError('Unknown command')
 
     def unpack(self, frame: str) -> Optional[Union[List, BulkStringType, SimpleStringType, ErrorType, int]]:
-        type, body = frame[0], frame[1:]
+        frame_type, body = frame[0], frame[1:]
 
-        if type == '*': # Array
+        if frame_type == '*': # Array
             length = int(body)
 
             return [
                 self.unpack(self.receive()) for _ in range(length)
             ]
-        elif type == '$': # Bulk string
+        elif frame_type == '$': # Bulk string
             length = int(body)
 
             if length == -1: # Null bulk string
                 return None
 
             return BulkStringType(self.receive(length))
-        elif type == ':': # Integer
+        elif frame_type == ':': # Integer
             return int(body)
-        elif type == '-': # Error
+        elif frame_type == '-': # Error
             return ErrorType(body)
-        elif type == '+': # Simple string
+        elif frame_type == '+': # Simple string
             return SimpleStringType(body)
 
         raise ValueError('Unknown type')
