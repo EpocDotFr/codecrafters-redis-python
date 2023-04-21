@@ -87,7 +87,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
                 if not isinstance(part, BulkStringType):
                     raise ValueError('Expected non-empty array of bulk strings from client')
 
-            command = request[0]
+            command = request[0].upper()
 
             if command == 'COMMAND':
                 break # Ignore COMMAND connection
