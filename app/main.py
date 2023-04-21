@@ -44,7 +44,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
     def send(self, data: Optional[Union[List, BulkStringType, SimpleStringType, ErrorType, int]]) -> int:
         return self.wfile.write(self.pack(data).encode())
 
-    def parse_args(self, request: List[BulkStringType], args: Optional[List[str]] = None, kvargs: Optional[List[str]] = None) -> Namespace:
+    def parse_args(self, request: List[BulkStringType], args: Optional[List[str]] = None, kvargs: Optional[List[str]] = None) -> SimpleNamespace:
         all_args = request[1:]
         args = args if args is not None else []
         kvargs = kvargs if kvargs is not None else []
