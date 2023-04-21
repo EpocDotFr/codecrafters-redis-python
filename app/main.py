@@ -1,5 +1,5 @@
 from typing import Union, List, Optional, Dict
-from argparse import Namespace
+from types import SimpleNamespace
 from time import time
 import socketserver
 
@@ -49,7 +49,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
         args = args if args is not None else []
         kvargs = kvargs if kvargs is not None else []
 
-        ret = Namespace()
+        ns = SimpleNamespace()
 
         for i, arg in enumerate(args):
             try:
@@ -57,7 +57,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
             except IndexError:
                 value = None
 
-            setattr(ret, arg, value)
+            ns[arg] = value
 
         for kvarg in kvargs:
             try:
@@ -67,9 +67,9 @@ class RESPHandler(socketserver.StreamRequestHandler):
             except (ValueError, IndexError):
                 value = None
 
-            setattr(ret, kvarg, value)
+            ns[kvarg] = value
 
-        return ret
+        return ns
 
     def handle(self) -> None:
         while True:
