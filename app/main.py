@@ -57,7 +57,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
             except IndexError:
                 value = None
 
-            ns[arg] = value
+            setattr(ns, arg, value)
 
         for kvarg in kvargs:
             try:
@@ -67,7 +67,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
             except (ValueError, IndexError):
                 value = None
 
-            ns[kvarg] = value
+            setattr(ns, kvarg, value)
 
         return ns
 
