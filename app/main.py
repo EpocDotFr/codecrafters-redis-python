@@ -1,7 +1,11 @@
 from typing import Union, List, Optional, Dict
 from types import SimpleNamespace
-from time import time
+from time import time_ns
 import socketserver
+
+
+def now_ms() -> int:
+    return time_ns() // 1000000
 
 
 class SimpleStringType(str):
@@ -102,7 +106,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
 
                 self.server.store[args.key] = (
                     args.value,
-                    (int(time()) + int(int(args.PX) / 1000)) if args.PX else None
+                    (now_ms() + int(args.PX)) if args.PX else None
                 )
 
                 self.send(SimpleStringType('OK'))
@@ -111,7 +115,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
 
                 value, ttl = self.server.store.get(args.key, (None, None))
 
-                if isinstance(ttl, int) and int(time()) >= ttl:
+                if isinstance(ttl, int) and now_ms() >= ttl:
                     value = None
 
                 self.send(BulkStringType(value) if value else None)
