@@ -4,7 +4,7 @@ from time import time_ns
 import socketserver
 
 
-def now_ms() -> int:
+def time_ms() -> int:
     return time_ns() // 1000000
 
 
@@ -104,9 +104,11 @@ class RESPHandler(socketserver.StreamRequestHandler):
             elif command == 'SET':
                 args = self.parse_args(request, args=['key', 'value'], kvargs=['PX'])
 
+                print(args.PX)
+
                 self.server.store[args.key] = (
                     args.value,
-                    (now_ms() + int(args.PX)) if args.PX else None
+                    (time_ms() + int(args.PX)) if args.PX else None
                 )
 
                 self.send(SimpleStringType('OK'))
@@ -115,7 +117,7 @@ class RESPHandler(socketserver.StreamRequestHandler):
 
                 value, ttl = self.server.store.get(args.key, (None, None))
 
-                if isinstance(ttl, int) and now_ms() >= ttl:
+                if isinstance(ttl, int) and time_ms() >= ttl:
                     value = None
 
                 self.send(BulkStringType(value) if value else None)
