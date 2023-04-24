@@ -102,13 +102,11 @@ class RESPHandler(socketserver.StreamRequestHandler):
 
                 self.send(args.message)
             elif command == 'SET':
-                args = self.parse_args(request, args=['key', 'value'], kvargs=['PX'])
-
-                print(args.PX)
+                args = self.parse_args(request, args=['key', 'value'], kvargs=['px'])
 
                 self.server.store[args.key] = (
                     args.value,
-                    (time_ms() + int(args.PX)) if args.PX else None
+                    (time_ms() + int(args.px)) if args.px else None
                 )
 
                 self.send(SimpleStringType('OK'))
