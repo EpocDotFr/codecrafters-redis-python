@@ -101,26 +101,23 @@ class RESPHandler(StreamRequestHandler):
                     args.action = args.action.upper()
 
                 if args.action == 'GET':
-                    if not args.parameter:
-                        self.send(ErrorType('CONFIG GET missing parameter name'))
-                    else:
-                        value = self.server.config.get(args.parameter)
+                    value = self.server.config.get(args.parameter)
 
-                        self.send([
-                            BulkStringType(args.parameter),
-                            BulkStringType(value) if value is not None else None
-                        ])
+                    self.send([
+                        BulkStringType(args.parameter),
+                        BulkStringType(value) if value is not None else None
+                    ])
                 elif args.action == 'SET':
-                    if not args.parameter:
-                        self.send(ErrorType('CONFIG SET missing parameter name'))
-                    elif not args.value:
-                        self.send(ErrorType('CONFIG SET missing parameter value'))
-                    else:
-                        self.server.config[args.parameter] = args.value
+                    self.server.config[args.parameter] = args.value
 
-                        self.send(SimpleStringType('OK'))
+                    self.send(SimpleStringType('OK'))
                 else:
                     self.send(ErrorType('Unknown CONFIG subcommand'))
+            elif command == 'KEYS':
+                args = self.parse_args(request, args=['pattern'])
+
+                if args.pattern == '*':
+                    self.send(list(self.server.store.keys()))
             else:
                 self.send(ErrorType('Unknown command'))
 
