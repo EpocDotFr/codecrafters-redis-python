@@ -3,7 +3,7 @@ from socketserver import StreamRequestHandler
 from typing import Union, List, Optional
 from app.server import RedisServer
 from types import SimpleNamespace
-from utils import time_ms
+from app.utils import time_ms
 
 
 class RESPHandler(StreamRequestHandler):
