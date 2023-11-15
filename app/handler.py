@@ -1,8 +1,8 @@
 from app.custom_types import SimpleStringType, BulkStringType, ErrorType
 from socketserver import StreamRequestHandler
 from typing import Union, List, Optional
+from app.server import RedisServer
 from types import SimpleNamespace
-from server import RedisServer
 from utils import time_ms
 
 
