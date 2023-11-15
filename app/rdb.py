@@ -1,4 +1,4 @@
-from typing import Dict, BinaryIO
+from typing import Dict, BinaryIO, Optional
 import struct
 import os
 
