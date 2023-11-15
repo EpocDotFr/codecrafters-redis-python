@@ -2,3 +2,5 @@
 
 Source code of my solution to the CodeCrafters' "[Build Your Own Redis](https://codecrafters.io/challenges/redis)"
 challenge.
+
+I've put myself a personal challenge: do not use any third-party packages (only use built-in Python features).
