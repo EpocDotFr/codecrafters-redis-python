@@ -1,5 +1,5 @@
+from typing import Dict, BinaryIO, Optional, Tuple, Any, Union
 from app.custom_types import BulkStringType
-from typing import Dict, BinaryIO, Optional
 from app.utils import time_ms
 import struct
 import os
@@ -11,16 +11,16 @@ class RdbFile:
     def __init__(self, f: BinaryIO):
         self.f = f
 
-    @classmethod
-    def load_data(cls, f: BinaryIO, store: Dict):
-        rdb = cls(f)
-        rdb.read_data(store)
-
-    def read_data(self, store: Dict):
         if self.read_bytes(5) != b'REDIS':
             raise ValueError('Not an RDB file')
 
-        self.read_bytes(4) # Ignore version
+    @classmethod
+    def load_data(cls, f: BinaryIO, store: Dict) -> None:
+        rdb = cls(f)
+        rdb.read_data(store)
+
+    def read_data(self, store: Dict) -> None:
+        self.move_set(9)
 
         while True:
             opcode = self.read_byte()
@@ -57,13 +57,13 @@ class RdbFile:
 
                 self.store(store, key, value)
 
-    def store(self, store: Dict, key: str, value, expiry_ms: Optional[int] = None):
+    def store(self, store: Dict, key: str, value, expiry_ms: Optional[int] = None) -> None:
         if expiry_ms and expiry_ms <= time_ms():
             return
 
         store[key] = (value, expiry_ms)
 
-    def read_key_value(self):
+    def read_key_value(self) -> Tuple[BulkStringType, BulkStringType]:
         value_type = RdbFile.byte_to_int(self.read_byte())
 
         key = BulkStringType(self.read_string())
@@ -77,7 +77,7 @@ class RdbFile:
 
         return key, value
 
-    def read_string(self):
+    def read_string(self) -> Union[str, int]:
         special, value = self.read_length()
 
         if not special: # Length prefixed string
@@ -92,11 +92,10 @@ class RdbFile:
             elif value == 3: # Compressed string
                 compressed_len = self.read_length()[1]
 
-                self.read_length()[1] # Ignore uncompressed string length
-
+                self.read_length() # Ignore uncompressed string length
                 self.read_bytes(compressed_len) # Ignore compressed string
 
-    def read_length(self):
+    def read_length(self) -> Tuple[bool, int]:
         byte_binary = RdbFile.bytes_to_bits(self.read_byte())
         byte_binary_prefix = byte_binary[:2]
         byte_binary_value = byte_binary[2:]
@@ -110,31 +109,34 @@ class RdbFile:
         elif byte_binary_prefix == '11':
             return True, RdbFile.bits_to_int(byte_binary_value)
 
-    def read_uint8(self):
+    def read_uint8(self) -> int:
         return self.unpack('B')
 
-    def read_uint16(self):
+    def read_uint16(self) -> int:
         return self.unpack('H', 2)
 
-    def read_uint32(self):
+    def read_uint32(self) -> int:
         return self.unpack('I', 4)
 
-    def read_uint64(self):
+    def read_uint64(self) -> int:
         return self.unpack('Q', 8)
 
-    def read_remaining_bytes(self):
+    def read_remaining_bytes(self) -> bytes:
         return self.f.read()
 
-    def read_bytes(self, size: int):
+    def read_bytes(self, size: int) -> bytes:
         return self.f.read(size)
 
-    def read_byte(self):
+    def read_byte(self) -> bytes:
         return self.read_bytes(1)
 
-    def move(self, offset: int):
+    def move(self, offset: int) -> None:
         self.f.seek(offset, os.SEEK_CUR)
 
-    def unpack(self, fmt: str, size: int = 1):
+    def move_set(self, offset: int) -> None:
+        self.f.seek(offset, os.SEEK_SET)
+
+    def unpack(self, fmt: str, size: int = 1) -> Any:
         ret = struct.unpack(
             f'<{fmt}',
             self.read_bytes(size)
@@ -143,13 +145,13 @@ class RdbFile:
         return ret[0] if len(ret) == 1 else ret
 
     @staticmethod
-    def byte_to_int(b):
+    def byte_to_int(b) -> int:
         return int.from_bytes(b, byteorder='big')
 
     @staticmethod
-    def bytes_to_bits(b):
+    def bytes_to_bits(b) -> str:
         return format(RdbFile.byte_to_int(b), '08b')
 
     @staticmethod
-    def bits_to_int(b):
+    def bits_to_int(b) -> int:
         return int(b, 2)
