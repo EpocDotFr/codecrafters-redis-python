@@ -117,7 +117,7 @@ class RESPHandler(StreamRequestHandler):
                 args = self.parse_args(request, args=['pattern'])
 
                 if args.pattern == '*':
-                    self.send([BulkStringType(v) for v in list(self.server.store.keys())])
+                    self.send(list(self.server.store.keys()))
             else:
                 self.send(ErrorType('Unknown command'))
 

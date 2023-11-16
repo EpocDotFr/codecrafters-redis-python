@@ -1,3 +1,4 @@
+from app.custom_types import BulkStringType
 from typing import Dict, BinaryIO, Optional
 from app.utils import time_ms
 import struct
@@ -50,7 +51,7 @@ class RdbFile:
             elif opcode == b'\xFF': # End of file
                 self.read_remaining_bytes() # Ignore checksum
             else: # Key-Value pair without expiry
-                self.f.seek(-1, os.SEEK_CUR)
+                self.move(-1)
 
                 key, value = self.read_key_value()
 
@@ -60,20 +61,19 @@ class RdbFile:
         if expiry_ms and expiry_ms <= time_ms():
             return
 
-        store[key] = (
-            value,
-            expiry_ms or None
-        )
+        store[key] = (value, expiry_ms)
 
     def read_key_value(self):
         value_type = RdbFile.byte_to_int(self.read_byte())
 
-        key = self.read_string()
+        key = BulkStringType(self.read_string())
 
         value = None
 
         if value_type == 0: # String
-            value = self.read_string()
+            value = BulkStringType(self.read_string())
+
+        # Other types don't have to be implemented
 
         return key, value
 
@@ -131,9 +131,12 @@ class RdbFile:
     def read_byte(self):
         return self.read_bytes(1)
 
+    def move(self, offset: int):
+        self.f.seek(offset, os.SEEK_CUR)
+
     def unpack(self, fmt: str, size: int = 1):
         ret = struct.unpack(
-            f'>{fmt}',
+            f'<{fmt}',
             self.read_bytes(size)
         )
 
