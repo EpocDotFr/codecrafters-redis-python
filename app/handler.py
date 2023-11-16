@@ -117,7 +117,7 @@ class RESPHandler(StreamRequestHandler):
                 args = self.parse_args(request, args=['pattern'])
 
                 if args.pattern == '*':
-                    self.send(list(self.server.store.keys()))
+                    self.send([BulkStringType(v) for v in list(self.server.store.keys())])
             else:
                 self.send(ErrorType('Unknown command'))
 
@@ -144,7 +144,7 @@ class RESPHandler(StreamRequestHandler):
         elif frame_type == '+': # Simple string
             return SimpleStringType(body)
 
-        raise ValueError('Unknown type')
+        raise ValueError(f'Unknown frame type: {frame_type}')
 
     def pack(self, data: Optional[Union[List, BulkStringType, SimpleStringType, ErrorType, int]]) -> str:
         frame = ''
@@ -168,6 +168,6 @@ class RESPHandler(StreamRequestHandler):
             )
 
         if not frame:
-            raise ValueError('Unhandled type')
+            raise ValueError('Unhandled data type: {}'.format(type(data)))
 
         return frame + '\r\n'
