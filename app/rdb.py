@@ -1,8 +1,8 @@
 from typing import Dict, BinaryIO, Optional, Tuple, Any, Union
 from app.custom_types import BulkStringType
+from io import SEEK_CUR, SEEK_SET
 from app.utils import time_ms
 import struct
-import os
 
 
 class RdbFile:
@@ -131,10 +131,10 @@ class RdbFile:
         return self.read_bytes(1)
 
     def move(self, offset: int) -> None:
-        self.f.seek(offset, os.SEEK_CUR)
+        self.f.seek(offset, SEEK_CUR)
 
     def move_set(self, offset: int) -> None:
-        self.f.seek(offset, os.SEEK_SET)
+        self.f.seek(offset, SEEK_SET)
 
     def unpack(self, fmt: str, size: int = 1) -> Any:
         ret = struct.unpack(
