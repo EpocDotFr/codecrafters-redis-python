@@ -96,14 +96,14 @@ class RdbFile:
                 self.read_bytes(compressed_len) # Ignore compressed string
 
     def read_length(self) -> Tuple[bool, int]:
-        byte_binary = RdbFile.bytes_to_bits(self.read_byte())
+        byte_binary = RdbFile.byte_to_bits(self.read_byte())
         byte_binary_prefix = byte_binary[:2]
         byte_binary_value = byte_binary[2:]
 
         if byte_binary_prefix == '00':
             return False, RdbFile.bits_to_int(byte_binary_value)
         elif byte_binary_prefix == '01':
-            return False, RdbFile.bits_to_int(byte_binary_value + RdbFile.bytes_to_bits(self.read_byte()))
+            return False, RdbFile.bits_to_int(byte_binary_value + RdbFile.byte_to_bits(self.read_byte()))
         elif byte_binary_prefix == '10':
             return False, self.read_uint32()
         elif byte_binary_prefix == '11':
@@ -149,7 +149,7 @@ class RdbFile:
         return int.from_bytes(b, byteorder='big')
 
     @staticmethod
-    def bytes_to_bits(b) -> str:
+    def byte_to_bits(b) -> str:
         return format(RdbFile.byte_to_int(b), '08b')
 
     @staticmethod
