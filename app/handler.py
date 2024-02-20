@@ -118,6 +118,13 @@ class RESPHandler(StreamRequestHandler):
 
                 if args.pattern == '*':
                     self.send(list(self.server.store.keys()))
+            elif command == 'INFO':
+                replication_section = [
+                    '# Replication',
+                    'role:master',
+                ]
+
+                self.send(BulkStringType('\n'.join(replication_section)))
             else:
                 self.send(ErrorType('Unknown command'))
 
