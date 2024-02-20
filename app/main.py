@@ -8,6 +8,7 @@ def main() -> None:
     arg_parser.add_argument('--dir')
     arg_parser.add_argument('--dbfilename')
     arg_parser.add_argument('--port', type=int, default=6379)
+    arg_parser.add_argument('--replicaof', nargs=2)
 
     args = arg_parser.parse_args()
 
@@ -18,6 +19,11 @@ def main() -> None:
 
     if args.dbfilename:
         config['dbfilename'] = args.dbfilename
+
+    if args.replicaof:
+        args.replicaof[1] = int(args.replicaof[1])
+
+        config['replicaof'] = args.replicaof
 
     with RedisServer(('127.0.0.1', args.port), RESPHandler, config=config) as server:
         try:

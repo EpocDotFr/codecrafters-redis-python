@@ -17,6 +17,7 @@ class RedisServer(ThreadingTCPServer):
         self.config = {
             'dir': tempfile.gettempdir(),
             'dbfilename': 'dump.rdb',
+            'replicaof': None,
         }
 
         if config:
@@ -31,3 +32,7 @@ class RedisServer(ThreadingTCPServer):
                 RdbFile.load_data(f, self.store)
         except FileNotFoundError:
             pass
+
+    @property
+    def role(self) -> str:
+        return 'slave' if self.config['replicaof'] is not None else 'master'

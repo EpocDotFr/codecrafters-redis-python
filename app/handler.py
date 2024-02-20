@@ -121,7 +121,7 @@ class RESPHandler(StreamRequestHandler):
             elif command == 'INFO':
                 replication_section = [
                     '# Replication',
-                    'role:master',
+                    f'role:{self.server.role}',
                 ]
 
                 self.send(BulkStringType('\n'.join(replication_section)))
