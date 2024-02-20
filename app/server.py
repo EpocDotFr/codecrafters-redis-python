@@ -1,5 +1,6 @@
 from socketserver import ThreadingTCPServer
 from typing import Optional, Dict
+from app.utils import rand_alnum
 from app.rdb import RdbFile
 import tempfile
 import os
@@ -10,6 +11,8 @@ class RedisServer(ThreadingTCPServer):
     daemon_threads = True
     config: Dict
     store: Dict
+    role: str
+    master_replid: str = ''
 
     def __init__(self, *args, config: Optional[Dict] = None, **kvargs):
         super().__init__(*args, **kvargs)
@@ -23,6 +26,11 @@ class RedisServer(ThreadingTCPServer):
         if config:
             self.config.update(config)
 
+        self.role = 'slave' if self.config['replicaof'] is not None else 'master'
+
+        if self.role == 'master':
+            self.master_replid = rand_alnum(40)
+
         self.store = {}
 
         rdb_filename = os.path.join(self.config.get('dir'), self.config.get('dbfilename'))
@@ -32,7 +40,3 @@ class RedisServer(ThreadingTCPServer):
                 RdbFile.load_data(f, self.store)
         except FileNotFoundError:
             pass
-
-    @property
-    def role(self) -> str:
-        return 'slave' if self.config['replicaof'] is not None else 'master'

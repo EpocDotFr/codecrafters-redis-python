@@ -122,6 +122,8 @@ class RESPHandler(StreamRequestHandler):
                 replication_section = [
                     '# Replication',
                     f'role:{self.server.role}',
+                    f'master_replid:{self.server.master_replid}',
+                    f'master_repl_offset:0',
                 ]
 
                 self.send(BulkStringType('\n'.join(replication_section)))
