@@ -21,9 +21,7 @@ def main() -> None:
         config['dbfilename'] = args.dbfilename
 
     if args.replicaof:
-        args.replicaof[1] = int(args.replicaof[1])
-
-        config['replicaof'] = args.replicaof
+        config['replicaof'] = (args.replicaof[0], int(args.replicaof[1]))
 
     with RedisServer(('127.0.0.1', args.port), RESPHandler, config=config) as server:
         try:

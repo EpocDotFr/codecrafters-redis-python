@@ -13,6 +13,7 @@ class RedisServer(ThreadingTCPServer):
     store: Dict
     role: str
     master_replid: str = ''
+    master_repl_offset: int = 0
 
     def __init__(self, *args, config: Optional[Dict] = None, **kvargs):
         super().__init__(*args, **kvargs)
