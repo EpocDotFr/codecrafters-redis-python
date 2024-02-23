@@ -1,4 +1,5 @@
 from socketserver import ThreadingTCPServer
+from app.client import RedisClient
 from typing import Optional, Dict
 from app.utils import rand_alnum
 from app.rdb import RdbFile
@@ -31,6 +32,9 @@ class RedisServer(ThreadingTCPServer):
 
         if self.role == 'master':
             self.master_replid = rand_alnum(40)
+        elif self.role == 'slave':
+            with RedisClient(self.config['replicaof']) as client:
+                client.ping()
 
         self.store = {}
 
