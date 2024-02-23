@@ -34,10 +34,10 @@ class RedisClient:
 
         return isinstance(response, SimpleStringType) and response == 'PONG'
 
-    def _enter_(self):
+    def __enter__(self):
         self.connect()
 
         return self
 
-    def _exit_(self, exc_type, exc_value, exc_traceback):
+    def __exit__(self, exc_type, exc_value, exc_traceback):
         self.disconnect()
