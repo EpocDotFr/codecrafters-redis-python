@@ -34,6 +34,18 @@ class RedisClient:
 
         return isinstance(response, SimpleStringType) and response == 'PONG'
 
+    def replconf(self, param: str, value: str) -> bool:
+        self.serializer.send([BulkStringType('REPLCONF'), BulkStringType(param), BulkStringType(value)])
+
+        response = self.serializer.receive()
+
+        return isinstance(response, SimpleStringType) and response == 'OK'
+
+    def psync(self, replicationid: str, offset: str):
+        self.serializer.send([BulkStringType('PSYNC'), BulkStringType(replicationid), BulkStringType(offset)])
+
+        response = self.serializer.receive()
+
     def __enter__(self):
         self.connect()
 
