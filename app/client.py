@@ -30,21 +30,36 @@ class RedisClient:
     def ping(self) -> bool:
         self.serializer.send([BulkStringType('PING')])
 
-        response = self.serializer.receive()
+        frame = self.serializer.receive()
+
+        if not frame:
+            return False
+
+        response = self.serializer.unserialize(frame)
 
         return isinstance(response, SimpleStringType) and response == 'PONG'
 
     def replconf(self, param: str, value: str) -> bool:
         self.serializer.send([BulkStringType('REPLCONF'), BulkStringType(param), BulkStringType(value)])
 
-        response = self.serializer.receive()
+        frame = self.serializer.receive()
+
+        if not frame:
+            return False
+
+        response = self.serializer.unserialize(frame)
 
         return isinstance(response, SimpleStringType) and response == 'OK'
 
     def psync(self, replicationid: str, offset: str):
         self.serializer.send([BulkStringType('PSYNC'), BulkStringType(replicationid), BulkStringType(offset)])
 
-        response = self.serializer.receive()
+        frame = self.serializer.receive()
+
+        if not frame:
+            return False
+
+        response = self.serializer.unserialize(frame)
 
     def __enter__(self):
         self.connect()
