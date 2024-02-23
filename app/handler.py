@@ -11,8 +11,8 @@ class RESPHandler(StreamRequestHandler):
     server: RedisServer
     serializer: Serializer
 
-    def __init__(self, *args, **kvargs):
-        super().__init__(*args, **kvargs)
+    def setup(self):
+        super().setup()
 
         self.serializer = Serializer(self.rfile, self.wfile)
 
