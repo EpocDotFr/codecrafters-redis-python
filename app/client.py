@@ -1,6 +1,6 @@
 from app.custom_types import SimpleStringType, BulkStringType
+from typing import Tuple, BinaryIO, Union
 from app.serializer import Serializer
-from typing import Tuple, BinaryIO
 import socket
 
 
@@ -27,39 +27,28 @@ class RedisClient:
         self.socket.shutdown(2)
         self.socket.close()
 
-    def ping(self) -> bool:
-        self.serializer.send([BulkStringType('PING')])
+    def send(self, *args):
+        self.serializer.send([BulkStringType(arg) for arg in args])
 
         frame = self.serializer.receive()
 
         if not frame:
             return False
 
-        response = self.serializer.unserialize(frame)
+        return self.serializer.unserialize(frame)
+
+    def ping(self) -> bool:
+        response = self.send('PING')
 
         return isinstance(response, SimpleStringType) and response == 'PONG'
 
-    def replconf(self, param: str, value: str) -> bool:
-        self.serializer.send([BulkStringType('REPLCONF'), BulkStringType(param), BulkStringType(value)])
-
-        frame = self.serializer.receive()
-
-        if not frame:
-            return False
-
-        response = self.serializer.unserialize(frame)
+    def replconf(self, param: str, value: Union[int, str]) -> bool:
+        response = self.send('REPLCONF', param, value)
 
         return isinstance(response, SimpleStringType) and response == 'OK'
 
-    def psync(self, replicationid: str, offset: str):
-        self.serializer.send([BulkStringType('PSYNC'), BulkStringType(replicationid), BulkStringType(offset)])
-
-        frame = self.serializer.receive()
-
-        if not frame:
-            return False
-
-        response = self.serializer.unserialize(frame)
+    def psync(self, replicationid: str, offset: int):
+        response = self.send('PSYNC', replicationid, offset)
 
     def __enter__(self):
         self.connect()
