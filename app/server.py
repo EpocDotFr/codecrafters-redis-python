@@ -33,11 +33,14 @@ class RedisServer(ThreadingTCPServer):
         if self.role == 'master':
             self.master_replid = rand_alnum(40)
         elif self.role == 'slave':
-            with RedisClient(self.config['replicaof']) as client:
-                client.ping()
-                client.replconf('listening-port', self.server_address[1])
-                client.replconf('capa', 'psync2')
-                # client.psync(self.master_replid or '?', self.master_repl_offset or -1)
+            try:
+                with RedisClient(self.config['replicaof']) as client:
+                    client.ping()
+                    client.replconf('listening-port', self.server_address[1])
+                    client.replconf('capa', 'psync2')
+                    # client.psync(self.master_replid or '?', self.master_repl_offset or -1)
+            except (BrokenPipeError, OSError):
+                pass
 
         self.store = {}
 
