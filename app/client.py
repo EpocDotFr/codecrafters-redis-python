@@ -42,8 +42,8 @@ class RedisClient:
 
         return isinstance(response, SimpleStringType) and response == 'PONG'
 
-    def replconf(self, param: str, value: Union[int, str]) -> bool:
-        response = self.send('REPLCONF', param, value)
+    def replconf(self, parameter: str, value: Union[int, str]) -> bool:
+        response = self.send('REPLCONF', parameter, value)
 
         return isinstance(response, SimpleStringType) and response == 'OK'
 

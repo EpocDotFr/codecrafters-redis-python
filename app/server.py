@@ -23,6 +23,7 @@ class RedisServer(ThreadingTCPServer):
             'dir': tempfile.gettempdir(),
             'dbfilename': 'dump.rdb',
             'replicaof': None,
+            'replication': {}
         }
 
         if config:

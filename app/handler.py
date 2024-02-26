@@ -120,5 +120,11 @@ class RESPHandler(StreamRequestHandler):
                 ]
 
                 self.serializer.send(BulkStringType('\n'.join(replication_section)))
+            elif command == 'REPLCONF':
+                args = self.parse_args(request, args=['parameter', 'value'])
+
+                self.server.config['replication'][args.parameter] = args.value
+
+                self.serializer.send(SimpleStringType('OK'))
             else:
                 self.serializer.send(ErrorType('Unknown command'))
